@@ -6,25 +6,14 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/rhemmm/Task/db"
 	"github.com/rhemmm/Task/types"
-	md "github.com/shurcool/github_flavored_markdown"
 )
 
 var templates *template.Template
 var homeTemplate *template.Template
 
-var comments types.Comments
-var category types.Category
-var categories []types.Category
 var tasks types.Tasks
-
-func init() {
-	category = types.Category{Name: "Random", TaskCount: "1"}
-	categories = append(categories, category)
-	category = types.Category{Name: "Very Random", TaskCount: "1"}
-	categories = append(categories, category)
-
-}
 
 // PopulateTemplate reads the ./templates folder and parse all the html files inside it
 // and  it stores it in the templates variable which will be looked up by other variables
@@ -81,11 +70,7 @@ func ShowCompletedTasksFunc(w http.ResponseWriter, r *http.Request) {
 // HomeFunc handles the / URL and asks the name of the user in German
 func HomeFunc(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		for i, _ := range tasks {
-			tasks[i].HTMLContent = template.HTML(string(md.Markdown([]byte(tasks[i].Content))))
-		}
-
-		context := types.Context{Tasks: tasks, CSRFToken: "supersecret", Categories: categories}
+		context := db.GetPendingTasks("suraj")
 
 		homeTemplate.Execute(w, context)
 	}
