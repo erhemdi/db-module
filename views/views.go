@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/rhemmm/Task/types"
+	md "github.com/shurcool/github_flavored_markdown"
 )
 
 var templates *template.Template
@@ -62,8 +63,6 @@ func AddTaskFunc(w http.ResponseWriter, r *http.Request) {
 
 			task.Created = "17 Dec 2016"
 
-			fmt.Println(tasks)
-
 			http.Redirect(w, r, "/", http.StatusFound)
 		} else {
 			fmt.Println("CSRF Mismatch")
@@ -82,6 +81,10 @@ func ShowCompletedTasksFunc(w http.ResponseWriter, r *http.Request) {
 // HomeFunc handles the / URL and asks the name of the user in German
 func HomeFunc(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
+		for i, _ := range tasks {
+			tasks[i].HTMLContent = template.HTML(string(md.Markdown([]byte(tasks[i].Content))))
+		}
+
 		context := types.Context{Tasks: tasks, CSRFToken: "supersecret", Categories: categories}
 
 		homeTemplate.Execute(w, context)
